@@ -336,7 +336,22 @@ const group2Verbs = [
 // 三类动词 (不规则 / Group 3)
 // ==========================================
 const group3Verbs = [
-    { basic: "来る (くる)", meaning: "来", answers: { te_ta: "来て / 来た", nai: "来ない", causative: "来させる", passive: "来られる", causative_passive: "来させられる", masu: "来ます", imperative: "来い", ba: "来れば", potential: "来られる", volitional: "来よう" } },
+    {
+        basic: "来る (くる)",
+        meaning: "来 (不规则: ki/ku/ko)",
+        answers: {
+            te_ta: "来て (きて) / 来た (きた)",   // 读 ki
+            nai: "来ない (こない)",              // 读 ko
+            causative: "来させる (こさせる)",     // 读 ko
+            passive: "来られる (こられる)",       // 读 ko
+            causative_passive: "来させられる (こさせられる)", // 读 ko
+            masu: "来ます (きます)",             // 读 ki
+            imperative: "来い (こい)",           // 读 ko
+            ba: "来れば (くれば)",               // 读 ku (注意这里是 ku)
+            potential: "来られる (こられる)",     // 读 ko
+            volitional: "来よう (こよう)"        // 读 ko
+        }
+    },
     { basic: "する", meaning: "做", answers: { te_ta: "して / した", nai: "しない", causative: "させる", passive: "される", causative_passive: "させられる", masu: "します", imperative: "しろ", ba: "すれば", potential: "できる", volitional: "しよう" } },
     { basic: "勉強する (べんきょうする)", meaning: "学习", answers: { te_ta: "勉強して / 勉強した", nai: "勉強しない", causative: "勉強させる", passive: "勉強される", causative_passive: "勉強させられる", masu: "勉強します", imperative: "勉強しろ", ba: "勉強すれば", potential: "勉強できる", volitional: "勉強しよう" } },
     { basic: "散歩する (さんぽする)", meaning: "散步", answers: { te_ta: "散歩して / 散歩した", nai: "散歩しない", causative: "散歩させる", passive: "散歩される", causative_passive: "散歩させられる", masu: "散歩します", imperative: "散歩しろ", ba: "散歩すれば", potential: "散歩できる", volitional: "散歩しよう" } },
