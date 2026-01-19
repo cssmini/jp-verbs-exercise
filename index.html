@@ -2,11 +2,10 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>日语动词变形记忆卡</title>
     <style>
         :root {
-            /* 配色变量 */
             --primary-color: #409eff;
             --primary-hover: #66b1ff;
             --warning-color: #e6a23c;
@@ -18,13 +17,9 @@
             --border-color: #ebeef5;
             --bg-header: #f5f7fa;
             --bg-body: #f0f2f5;
-
-            /* 遮罩变量 */
             --mask-bg: #a0cfff;
             --mask-hover: #c6e2ff;
             --mask-text-revealed: #409eff;
-
-            /* 标签颜色 */
             --tag-g1: #e6a23c;
             --tag-g2: #67c23a;
             --tag-g3: #909399;
@@ -51,6 +46,7 @@
             height: 90vh;
         }
 
+        /* --- Header --- */
         .header {
             margin-bottom: 20px;
             display: flex;
@@ -62,8 +58,8 @@
 
         h1 { font-size: 20px; color: var(--text-main); margin: 0; }
 
-        .btn-group { display: flex; gap: 10px; }
-        .btn { border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: 0.3s; color: white; }
+        .btn-group { display: flex; gap: 10px; align-items: center; }
+        .btn { border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: 0.3s; color: white; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
         .btn-primary { background-color: var(--primary-color); }
         .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-default { background-color: var(--text-secondary); }
@@ -72,17 +68,67 @@
         .btn-warning:hover { background-color: var(--warning-hover); }
         .btn-success { background-color: var(--success-color); }
         .btn-success:hover { background-color: var(--success-hover); }
+        .btn-text { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .btn-text:hover { color: var(--primary-color); border-color: var(--primary-color); }
 
-        .tabs { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 0; }
-        .tab-item { padding: 12px 24px; cursor: pointer; font-size: 15px; color: #606266; transition: all 0.3s; border-bottom: 2px solid transparent; margin-bottom: -2px; font-weight: 500; }
-        .tab-item:hover { color: var(--primary-color); }
-        .tab-item.active { color: var(--primary-color); border-bottom-color: var(--primary-color); font-weight: bold; }
+        /* --- Tabs --- */
+        /* --- Tabs (修复版：光标回归) --- */
+        .tabs {
+            display: flex;
+            margin-bottom: 0;
 
+            /* 关键：设置为 relative，为子元素的层级定位做参照 */
+            position: relative;
+
+            /* 支持横向滚动 */
+            overflow-x: auto;
+            white-space: nowrap;
+
+            /* 隐藏滚动条 */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+
+        .tab-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #606266;
+            transition: all 0.3s;
+
+            /* 关键点1：默认边框透明，高度占位 */
+            border-bottom: 2px solid transparent;
+
+            font-weight: 500;
+            white-space: nowrap;
+            flex-shrink: 0;
+
+            /* 关键点3 (修复BUG核心)：提升层级，确保盖在父级边框之上 */
+            position: relative;
+            z-index: 1;
+        }
+
+        .tab-item:hover {
+            color: var(--primary-color);
+        }
+
+        /* 选中状态：蓝色下划线 */
+        .tab-item.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: bold;
+
+            /* 再次确保选中项在最上层 */
+            z-index: 2;
+        }
+        /* --- Table --- */
         .table-wrapper {
             flex: 1;
             overflow: auto;
             border: 1px solid var(--border-color);
             border-top: none;
+            position: relative;
         }
 
         table {
@@ -108,149 +154,195 @@
             font-weight: bold;
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 20;
         }
 
-        th .sub-title {
-            font-size: 12px;
-            font-weight: normal;
-            display: block;
-            margin-top: 2px;
-            opacity: 0.8;
-        }
+        th .sub-title { font-size: 12px; font-weight: normal; display: block; margin-top: 2px; opacity: 0.8; }
 
-        /* --- Sticky Columns --- */
-        .col-fixed-0 { position: sticky; left: 0; z-index: 11; background-color: #fff; width: 50px; text-align: center; color: #909399; }
-        .col-fixed-1 { position: sticky; left: 50px; z-index: 11; background-color: #fff; width: 70px; text-align: center; }
-        .col-fixed-2 { position: sticky; left: 120px; z-index: 11; background-color: #fff; width: 100px; }
-        .col-fixed-3 { position: sticky; left: 220px; z-index: 11; background-color: #fff; width: 110px; border-right: 2px solid var(--border-color); box-shadow: 4px 0 8px -4px rgba(0,0,0,0.1); }
-        th.col-fixed-0, th.col-fixed-1, th.col-fixed-2, th.col-fixed-3 { background-color: var(--bg-header); z-index: 12; }
+        /* Sticky Columns */
+        .sticky-col { position: sticky; z-index: 10; background-color: #fff; }
+        th.sticky-col { background-color: var(--bg-header); z-index: 30; }
+        .sticky-shadow { box-shadow: 4px 0 8px -4px rgba(0,0,0,0.1); border-right: 2px solid var(--border-color); }
 
-        /* --- Footer (新增) --- */
-        .footer {
-            margin-top: 10px;
-            padding-top: 10px;
+        /* --- Footer --- */
+        .footer-bar {
+            /* 原有的 margin-top 去掉，避免间距过大 */
+            margin-top: 0;
+            padding: 15px 10px; /* 增加底部留白，防止贴底 */
             border-top: 1px solid var(--border-color);
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        .footer a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        .footer a:hover {
-            color: var(--primary-color);
-            text-decoration: underline;
-        }
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            background-color: #fff; /* 确保背景遮盖 */
 
-        /* --- Content Styling --- */
+            /* 关键修改：让页脚在横向滚动时始终吸附在左侧 */
+            position: sticky;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box; /* 确保 padding 不撑大宽度 */
+        }
+        .pagination { display: flex; gap: 5px; align-items: center; }
+        .page-btn { padding: 4px 10px; border: 1px solid var(--border-color); background: white; cursor: pointer; border-radius: 4px; color: var(--text-main); }
+        .page-btn:hover:not(:disabled) { color: var(--primary-color); border-color: var(--primary-color); }
+        .page-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .page-btn:disabled { cursor: not-allowed; color: #ccc; background: #f5f7fa; }
+        .page-info { color: var(--text-secondary); margin-left: 10px; }
+        .copyright a { color: var(--text-secondary); text-decoration: none; }
+        .copyright a:hover { color: var(--primary-color); text-decoration: underline; }
+
+        /* --- Components --- */
         .tag { font-size: 12px; padding: 3px 8px; border-radius: 10px; color: #fff; font-weight: bold; display: inline-block; }
         .tag-g1 { background-color: var(--tag-g1); }
         .tag-g2 { background-color: var(--tag-g2); }
         .tag-g3 { background-color: var(--tag-g3); }
         .tag-special { background-color: var(--tag-special); }
 
-        .text-kanji {
-            font-weight: bold;
-            color: var(--text-main);
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .text-kanji { font-weight: bold; color: var(--text-main); font-size: 16px; display: flex; align-items: center; gap: 8px; }
         .text-reading { color: #606266; font-size: 14px; }
         .short-form-text { color: #e6a23c; font-weight: bold; }
-
-        .search-icon {
-            font-size: 14px;
-            color: var(--primary-color);
-            cursor: pointer;
-            opacity: 0.6;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
+        .search-icon { font-size: 14px; color: var(--primary-color); cursor: pointer; opacity: 0.6; transition: all 0.2s; }
         .search-icon:hover { opacity: 1; transform: scale(1.1); }
 
-        /* --- Mask System --- */
-        .mask-cell {
-            background-color: var(--mask-bg);
-            color: transparent;
-            border-radius: 4px;
-            padding: 6px 10px;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.2s ease;
-            text-align: center;
-            min-width: 80px;
-            margin: 2px 0;
-            white-space: nowrap;
-        }
+        .mask-cell { background-color: var(--mask-bg); color: transparent; border-radius: 4px; padding: 6px 10px; cursor: pointer; user-select: none; transition: all 0.2s ease; text-align: center; min-width: 80px; margin: 2px 0; white-space: nowrap; }
         .mask-cell:hover { background-color: var(--mask-hover); }
         .mask-cell.revealed { background-color: transparent; color: var(--mask-text-revealed); font-weight: bold; cursor: default; }
         .mask-cell.revealed:hover { background-color: var(--bg-header); cursor: pointer; }
         .mask-cell.revealed.is-short { color: #e6a23c; }
+        .mask-mini { font-size: 12px; display: inline-block; padding: 2px 6px; height: auto; line-height: 1.4; max-width: 180px; overflow: hidden; text-overflow: ellipsis; vertical-align: top; }
 
-        .mask-mini {
-            font-size: 12px;
-            display: inline-block;
-            padding: 2px 6px;
-            height: auto;
-            line-height: 1.4;
-            max-width: 180px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            vertical-align: top;
-        }
-
-        /* --- Modal --- */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
+        /* --- Modals --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            width: 320px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            text-align: center;
-        }
-        .modal-title { margin: 0 0 20px 0; font-size: 18px; color: var(--text-main); }
-        .modal-word { color: var(--primary-color); font-size: 24px; font-weight: bold; margin-bottom: 20px; display: block; }
-        .dict-btn-list { display: flex; flex-direction: column; gap: 10px; }
-        .dict-btn {
-            display: block; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px;
-            text-decoration: none; color: #606266; font-size: 15px; transition: all 0.2s;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .dict-btn:hover { background-color: #f0f9eb; color: var(--primary-color); border-color: #c2e7b0; }
-        .modal-close { margin-top: 20px; padding: 8px 20px; background: #f4f4f5; border: none; border-radius: 4px; cursor: pointer; color: #909399; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 320px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+        .modal-title { margin: 0 0 20px 0; font-size: 18px; color: var(--text-main); font-weight: bold; text-align: center; }
+        .modal-close { margin-top: 20px; width: 100%; padding: 10px; background: #f4f4f5; border: none; border-radius: 4px; cursor: pointer; color: #909399; }
         .modal-close:hover { background: #e9e9eb; }
+
+        .modal-word { color: var(--primary-color); font-size: 24px; font-weight: bold; margin-bottom: 20px; display: block; text-align: center; }
+        .dict-btn-list { display: flex; flex-direction: column; gap: 10px; }
+        .dict-btn { display: flex; justify-content: space-between; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; text-decoration: none; color: #606266; font-size: 15px; transition: all 0.2s; }
+        .dict-btn:hover { background-color: #f0f9eb; color: var(--primary-color); border-color: #c2e7b0; }
+
+        .setting-item { margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .setting-label { font-size: 14px; color: var(--text-main); }
+        .setting-input { width: 60px; padding: 5px; border: 1px solid var(--border-color); border-radius: 4px; text-align: center; }
+
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* =========================================
+           移动端/小屏幕 横屏优化专用补丁
+           ========================================= */
+        @media screen and (max-width: 900px) {
+            body { padding: 0; margin: 0; background-color: #fff; }
+            .container {
+                /* 改为 100vh 甚至 100dvh (动态视口高度，解决移动端底栏遮挡问题) */
+                height: 100vh;
+                /* 兼容写法 */
+                height: 100dvh;
+                /* ...其他属性保持不变... */
+                max-width: 100%;
+                margin: 0 auto;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+                padding: 5px 10px;
+                display: flex;
+                flex-direction: column;
+            }
+            /* Header 极致压缩 */
+            .header {
+                margin-bottom: 5px;
+                gap: 5px;
+                flex-wrap: nowrap; /* 强制不换行 */
+                overflow-x: auto;  /* 允许微量横向滚动 */
+                justify-content: space-between;
+                padding: 0 10px 2px 10px;
+            }
+            .tab-item {
+                padding: 4px 10px; /* PC是 8px 16px，这里减半 */
+                font-size: 13px;   /* 字体稍微缩小 */
+                line-height: 1.5;  /* 控制行高，防止被撑大 */
+            }
+            .tab-item.active {
+                border-bottom-width: 2px;
+            }
+            /* 隐藏大标题 */
+            h1 {
+                display: block;       /* 恢复显示 */
+                font-size: 14px;      /* 字号改小，和按钮差不多大 */
+                margin: 0;            /* 去掉外边距 */
+                white-space: nowrap;  /* 强制不换行 */
+                flex-shrink: 0;       /* 防止被挤压 */
+                color: var(--primary-color); /* 变成蓝色，稍微醒目点 */
+                font-weight: bold;
+            }
+
+            /* 按钮极简模式 */
+            .btn {
+                padding: 4px 8px;
+                font-size: 12px;
+                height: 28px;
+                flex-shrink: 0; /* 防止按钮被挤压 */
+            }
+
+            /* 表格紧凑 */
+            th, td {
+                padding: 4px 4px; /* 上下左右都减小 */
+                font-size: 13px;
+                height: auto;     /* 允许高度自动缩小 */
+                line-height: 1.2; /* 减小行高 */
+            }
+            .mask-cell {
+                padding: 2px 4px; /* 极小的内边距 */
+                min-width: 50px;  /* 稍微允许更窄 */
+                margin: 0;        /* 去掉外边距 */
+                font-size: 13px;
+                display: inline-block; /* 防止撑满高度 */
+                vertical-align: middle;
+            }
+            /* 3. 汉字和读音列的紧凑化 */
+            .text-kanji {
+                font-size: 14px;
+                margin: 0;
+            }
+            .mask-mini {
+                padding: 0 2px; /* 迷你遮罩更紧凑 */
+                margin-top: 2px;
+            }
+            /* 底部栏紧凑 */
+            .footer-bar { padding-top: 5px; margin-top: 5px; font-size: 12px; }
+            .page-btn { padding: 2px 8px; font-size: 12px; }
+
+            /* 弹窗适应 */
+            .modal-content { width: 90%; max-height: 90vh; overflow-y: auto; padding: 15px; }
+
+            @supports (padding-left: env(safe-area-inset-left)) {
+                .container {
+                    padding-left: env(safe-area-inset-left);
+                    padding-right: env(safe-area-inset-right);
+                    padding-bottom: env(safe-area-inset-bottom);
+                }
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>日语动词变形一览</h1>
+        <h1>日语动词变形</h1>
         <div class="btn-group">
-            <button class="btn btn-success" id="btn-toggle-cp" onclick="toggleCPMode()">切换：标准完整形</button>
-            <button class="btn btn-warning" id="btn-shuffle">随机乱序</button>
-            <button class="btn btn-default" id="btn-reset">重置遮罩</button>
-            <button class="btn btn-primary" id="btn-show-all">全部显示</button>
+            <button class="btn btn-success" id="btn-toggle-cp" onclick="toggleCPMode()">口语缩略</button>
+            <button class="btn btn-warning" id="btn-shuffle" onclick="handleShuffle()">乱序</button>
+            <button class="btn btn-default" id="btn-reset" onclick="toggleAllMasks(false)">重置</button>
+            <button class="btn btn-primary" id="btn-show-all" onclick="toggleAllMasks(true)">全显</button>
+            <button class="btn btn-text" onclick="openSettingsModal()">⚙️</button>
         </div>
     </div>
 
@@ -266,36 +358,70 @@
         <table id="conjugation-table">
             <thead>
             <tr id="table-header-row">
-                <th class="col-fixed-0">No.</th>
-                <th class="col-fixed-1">类型</th>
-                <th class="col-fixed-2">汉字<span class="sub-title">Basic</span></th>
-                <th class="col-fixed-3">读音<span class="sub-title">Reading</span></th>
             </tr>
             </thead>
             <tbody id="table-body">
             </tbody>
         </table>
+
+        <div class="footer-bar">
+            <div class="pagination" id="pagination-container"></div>
+            <div class="copyright">
+                <a href="https://cssmini.github.io/" target="_blank">cssmini.github.io</a>
+            </div>
+        </div>
     </div>
 
-    <div class="footer">
-        <a href="https://cssmini.github.io/" target="_blank">
-            Copyright ©  cssmini
-        </a>
-    </div>
 </div>
 
 <div class="modal-overlay" id="dict-modal">
     <div class="modal-content">
         <h3 class="modal-title">在线字典查询</h3>
         <span class="modal-word" id="modal-word-display">--</span>
-
         <div class="dict-btn-list">
             <a href="#" target="_blank" class="dict-btn" id="link-mazii"><span>Mazii (玛吉)</span><span>👉</span></a>
             <a href="#" target="_blank" class="dict-btn" id="link-jisho"><span>Jisho.org</span><span>👉</span></a>
             <a href="#" target="_blank" class="dict-btn" id="link-weblio"><span>Weblio (日日)</span><span>👉</span></a>
             <a href="#" target="_blank" class="dict-btn" id="link-google"><span>Google 翻译</span><span>👉</span></a>
         </div>
-        <button class="modal-close" onclick="closeDictModal()">关闭</button>
+        <button class="modal-close" onclick="closeModal('dict-modal')">关闭</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="settings-modal">
+    <div class="modal-content">
+        <h3 class="modal-title">设置</h3>
+
+        <div class="setting-item">
+            <span class="setting-label">显示序号 (No.)</span>
+            <label class="switch">
+                <input type="checkbox" id="setting-show-no" checked onchange="updateSettings()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <span class="setting-label">显示类型 (Type)</span>
+            <label class="switch">
+                <input type="checkbox" id="setting-show-type" checked onchange="updateSettings()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <span class="setting-label">显示注音 (读音列)</span>
+            <label class="switch">
+                <input type="checkbox" id="setting-show-reading" checked onchange="updateSettings()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <span class="setting-label">每页显示数量</span>
+            <input type="number" id="setting-page-size" class="setting-input" value="30" min="5" max="500" onchange="updateSettings()">
+        </div>
+
+        <button class="modal-close" onclick="closeModal('settings-modal')">关闭</button>
     </div>
 </div>
 
@@ -303,8 +429,51 @@
 
 <script>
     // ==========================================
-    // 配置部分
+    // 1. 工具函数：Cookie 管理
     // ==========================================
+    function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    // ==========================================
+    // 2. 全局状态管理
+    // ==========================================
+
+    const cookieShowNo = getCookie('jp_verb_show_no');
+    const cookieShowType = getCookie('jp_verb_show_type');
+    const cookieShowReading = getCookie('jp_verb_show_reading');
+    const cookiePageSize = getCookie('jp_verb_page_size');
+
+    const state = {
+        currentTab: 'all',
+        useShortForm: false,
+
+        showNo: cookieShowNo !== null ? (cookieShowNo === 'true') : true,
+        showType: cookieShowType !== null ? (cookieShowType === 'true') : true,
+        showReading: cookieShowReading !== null ? (cookieShowReading === 'true') : true,
+        pageSize: cookiePageSize !== null ? parseInt(cookiePageSize) : 30,
+
+        currentPage: 1,
+        fullDataList: [],
+        displayDataList: []
+    };
 
     const columnConfig = [
         { key: 'te', title: 'て形', subtitle: '' },
@@ -320,148 +489,148 @@
         { key: 'volitional', title: '意向形', subtitle: '吧/想' }
     ];
 
-    let currentTab = 'all';
-    let useShortForm = false;
-
     const tableBody = document.getElementById('table-body');
     const tableHeaderRow = document.getElementById('table-header-row');
     const btnToggleCP = document.getElementById('btn-toggle-cp');
+    const paginationContainer = document.getElementById('pagination-container');
+    const settingsModal = document.getElementById('settings-modal');
     const dictModal = document.getElementById('dict-modal');
 
+    const settingInputShowNo = document.getElementById('setting-show-no');
+    const settingInputShowType = document.getElementById('setting-show-type');
+    const settingInputShowReading = document.getElementById('setting-show-reading');
+    const settingInputPageSize = document.getElementById('setting-page-size');
+
     // ==========================================
-    // 核心逻辑
+    // 3. 核心逻辑
     // ==========================================
 
+    function getStickyOffsets() {
+        const widthMap = { no: 50, type: 70, kanji: 100, reading: 110 };
+        const isTypeVisible = state.showType;
+
+        let currentLeft = 0;
+
+        const offsetNo = currentLeft;
+        if (state.showNo) currentLeft += widthMap.no;
+
+        const offsetType = currentLeft;
+        if (isTypeVisible) currentLeft += widthMap.type;
+
+        const offsetKanji = currentLeft;
+        currentLeft += widthMap.kanji;
+
+        const offsetReading = currentLeft;
+
+        // 阴影列逻辑
+        const shadowTarget = state.showReading ? 'reading' : 'kanji';
+
+        return {
+            isTypeVisible,
+            offsets: { no: offsetNo, type: offsetType, kanji: offsetKanji, reading: offsetReading },
+            shadowTarget
+        };
+    }
+
     function renderHeader() {
-        while (tableHeaderRow.children.length > 4) {
-            tableHeaderRow.removeChild(tableHeaderRow.lastChild);
+        tableHeaderRow.innerHTML = '';
+        const { isTypeVisible, offsets, shadowTarget } = getStickyOffsets();
+
+        if (state.showNo) {
+            const thNo = createStickyTh('No.', offsets.no, 50, false);
+            tableHeaderRow.appendChild(thNo);
         }
+
+        if (isTypeVisible) {
+            const thType = createStickyTh('类型', offsets.type, 70, false);
+            tableHeaderRow.appendChild(thType);
+        }
+
+        const isKanjiShadow = (shadowTarget === 'kanji');
+        const thKanji = createStickyTh('汉字', offsets.kanji, 100, isKanjiShadow);
+        thKanji.innerHTML += `<span class="sub-title">Basic</span>`;
+        tableHeaderRow.appendChild(thKanji);
+
+        if (state.showReading) {
+            const isReadingShadow = (shadowTarget === 'reading');
+            const thReading = createStickyTh('读音', offsets.reading, 110, isReadingShadow);
+            thReading.innerHTML += `<span class="sub-title">Reading</span>`;
+            tableHeaderRow.appendChild(thReading);
+        }
+
         columnConfig.forEach(col => {
             const th = document.createElement('th');
             let titleText = col.title;
-            if (col.key === 'causative_passive' && useShortForm) {
-                titleText += ' (口语缩略)';
-            }
+            if (col.key === 'causative_passive' && state.useShortForm) titleText += ' (口语缩略)';
             th.innerHTML = `${titleText}<span class="sub-title">${col.subtitle}</span>`;
             tableHeaderRow.appendChild(th);
         });
     }
 
-    function parseBasicData(basicStr) {
-        const match = basicStr.match(/^(.*?)\s*\((.*?)\)$/);
-        return match ? { kanji: match[1], reading: match[2] } : { kanji: basicStr, reading: '' };
+    function createStickyTh(text, left, width, isShadow) {
+        const th = document.createElement('th');
+        th.textContent = text;
+        th.classList.add('sticky-col');
+        th.style.left = `${left}px`;
+        th.style.width = `${width}px`;
+        if (isShadow) th.classList.add('sticky-shadow');
+        return th;
     }
 
-    function splitTeTaData(teTaStr) {
-        if (!teTaStr) return { te: '-', ta: '-' };
-        const parts = teTaStr.split(' / ');
-        return parts.length === 2 ? { te: parts[0], ta: parts[1] } : { te: teTaStr, ta: '-' };
+    function createStickyTd(htmlContent, left, isShadow) {
+        const td = document.createElement('td');
+        td.innerHTML = htmlContent;
+        td.classList.add('sticky-col');
+        td.style.left = `${left}px`;
+        if (isShadow) td.classList.add('sticky-shadow');
+        return td;
     }
 
-    function convertToShortForm(longForm, typeLabel) {
-        if (typeLabel !== '一类') return { text: longForm, isShort: false };
-        if (longForm.includes('させられる')) return { text: longForm, isShort: false };
-        if (longForm.includes('せられる')) {
-            return {
-                text: longForm.replace('せられる', 'される'),
-                isShort: true
-            };
-        }
-        return { text: longForm, isShort: false };
-    }
+    function renderTable() {
+        const start = (state.currentPage - 1) * state.pageSize;
+        const end = start + state.pageSize;
+        state.displayDataList = state.fullDataList.slice(start, end);
 
-    function getRawDataByType(type) {
-        if (typeof group1Verbs === 'undefined') { alert('错误：无法加载 verbs-data.js'); return []; }
-        const process = (arr, label, cssClass) => arr.map(item => ({ ...item, typeLabel: label, typeClass: cssClass }));
-        if (type === 'group1') return process(group1Verbs, '一类', 'tag-g1');
-        if (type === 'group2') return process(group2Verbs, '二类', 'tag-g2');
-        if (type === 'group3') return process(group3Verbs, '三类', 'tag-g3');
-        if (type === 'special') {
-            if (typeof specialVerbs === 'undefined') return [];
-            return process(specialVerbs, '特例', 'tag-special');
-        }
-        const specials = (typeof specialVerbs !== 'undefined') ? process(specialVerbs, '特例', 'tag-special') : [];
-        return [...process(group1Verbs, '一类', 'tag-g1'), ...process(group2Verbs, '二类', 'tag-g2'), ...process(group3Verbs, '三类', 'tag-g3'), ...specials];
-    }
-
-    function shuffleArray(array) {
-        const newArr = [...array];
-        for (let i = newArr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
-        }
-        return newArr;
-    }
-
-    // --- 字典弹窗逻辑 ---
-    function openDictModal(word, event) {
-        // 阻止冒泡，防止触发遮罩的点击
-        if(event) event.stopPropagation();
-        document.getElementById('modal-word-display').textContent = word;
-
-        // 设置各个字典的链接
-        // Mazii (中文用户常用)
-        document.getElementById('link-mazii').href = `https://mazii.net/zh-CN/search/word/ja/zh-CN/${word}`;
-        // Jisho (英文解释详尽，语法分析好)
-        document.getElementById('link-jisho').href = `https://jisho.org/search/${word}`;
-        // Weblio (日日字典，权威)
-        document.getElementById('link-weblio').href = `https://www.weblio.jp/content/${word}`;
-        // Google (备用)
-        document.getElementById('link-google').href = `https://translate.google.com/?sl=ja&tl=zh-CN&text=${word}&op=translate`;
-
-        dictModal.classList.add('active');
-    }
-
-    function closeDictModal() {
-        dictModal.classList.remove('active');
-    }
-
-    // 点击遮罩层也可以关闭
-    dictModal.addEventListener('click', function(e) {
-        if (e.target === dictModal) closeDictModal();
-    });
-
-    function renderTable(dataList) {
         tableBody.innerHTML = '';
         const fragment = document.createDocumentFragment();
+        const { isTypeVisible, offsets, shadowTarget } = getStickyOffsets();
 
-        dataList.forEach((verb, index) => {
+        state.displayDataList.forEach((verb, index) => {
             const tr = document.createElement('tr');
             const basicInfo = parseBasicData(verb.basic);
             const teTaInfo = splitTeTaData(verb.answers.te_ta);
+            const globalIndex = start + index + 1;
 
-            // 0. 序号
-            const tdNo = document.createElement('td');
-            tdNo.className = 'col-fixed-0';
-            tdNo.textContent = index + 1;
-            tr.appendChild(tdNo);
+            if (state.showNo) {
+                const tdNo = createStickyTd(globalIndex, offsets.no, false);
+                tdNo.style.color = '#909399';
+                tdNo.style.textAlign = 'center';
+                tr.appendChild(tdNo);
+            }
 
-            // 1. 类型
-            const tdType = document.createElement('td');
-            tdType.className = 'col-fixed-1';
-            tdType.innerHTML = `<span class="tag ${verb.typeClass}">${verb.typeLabel}</span>`;
-            tr.appendChild(tdType);
+            if (isTypeVisible) {
+                const tdType = createStickyTd(`<span class="tag ${verb.typeClass}">${verb.typeLabel}</span>`, offsets.type, false);
+                tdType.style.textAlign = 'center';
+                tr.appendChild(tdType);
+            }
 
-            // 2. 汉字 (添加搜索图标)
-            const tdKanji = document.createElement('td');
-            tdKanji.className = 'col-fixed-2';
-            // 注意：这里给 🔍 图标添加了 onclick 事件
-            tdKanji.innerHTML = `
+            const isKanjiShadow = (shadowTarget === 'kanji');
+            const htmlKanji = `
                 <div class="text-kanji">
                     ${basicInfo.kanji}
                     <span class="search-icon" onclick="openDictModal('${basicInfo.kanji}', event)">🔍</span>
                 </div>
                 <div class="mask-cell mask-mini" data-mask="true" title="${verb.meaning}">${verb.meaning}</div>
             `;
+            const tdKanji = createStickyTd(htmlKanji, offsets.kanji, isKanjiShadow);
             tr.appendChild(tdKanji);
 
-            // 3. 读音
-            const tdReading = document.createElement('td');
-            tdReading.className = 'col-fixed-3';
-            tdReading.innerHTML = `<div class="text-reading">${basicInfo.reading}</div>`;
-            tr.appendChild(tdReading);
+            if (state.showReading) {
+                const isReadingShadow = (shadowTarget === 'reading');
+                const tdReading = createStickyTd(`<div class="text-reading">${basicInfo.reading}</div>`, offsets.reading, isReadingShadow);
+                tr.appendChild(tdReading);
+            }
 
-            // 变形列
             columnConfig.forEach(col => {
                 const td = document.createElement('td');
                 let content = '';
@@ -469,7 +638,7 @@
 
                 if (col.key === 'te') content = teTaInfo.te;
                 else if (col.key === 'ta') content = teTaInfo.ta;
-                else if (col.key === 'causative_passive' && useShortForm) {
+                else if (col.key === 'causative_passive' && state.useShortForm) {
                     const result = convertToShortForm(verb.answers[col.key], verb.typeLabel);
                     content = result.text;
                     if (result.isShort) isShortClass = 'is-short';
@@ -485,35 +654,180 @@
         });
 
         tableBody.appendChild(fragment);
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const totalItems = state.fullDataList.length;
+        const totalPages = Math.ceil(totalItems / state.pageSize);
+
+        if (totalItems === 0) {
+            paginationContainer.innerHTML = '<span class="page-info">暂无数据</span>';
+            return;
+        }
+
+        let html = '';
+        html += `<button class="page-btn" onclick="changePage(${state.currentPage - 1})" ${state.currentPage === 1 ? 'disabled' : ''}>Prev</button>`;
+
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+            }
+        } else {
+            html += `<button class="page-btn ${1 === state.currentPage ? 'active' : ''}" onclick="changePage(1)">1</button>`;
+            if (state.currentPage > 3) html += `<span class="page-info">...</span>`;
+
+            let start = Math.max(2, state.currentPage - 1);
+            let end = Math.min(totalPages - 1, state.currentPage + 1);
+
+            for (let i = start; i <= end; i++) {
+                html += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+            }
+
+            if (state.currentPage < totalPages - 2) html += `<span class="page-info">...</span>`;
+            html += `<button class="page-btn ${totalPages === state.currentPage ? 'active' : ''}" onclick="changePage(${totalPages})">${totalPages}</button>`;
+        }
+
+        html += `<button class="page-btn" onclick="changePage(${state.currentPage + 1})" ${state.currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+        html += `<span class="page-info">共 ${totalItems} 条</span>`;
+
+        paginationContainer.innerHTML = html;
+    }
+
+    function changePage(page) {
+        if (page < 1 || page > Math.ceil(state.fullDataList.length / state.pageSize)) return;
+        state.currentPage = page;
+        renderTable();
+        document.querySelector('.table-wrapper').scrollTop = 0;
+    }
+
+    // --- 数据解析辅助 ---
+    function parseBasicData(basicStr) {
+        const match = basicStr.match(/^(.*?)\s*\((.*?)\)$/);
+        return match ? { kanji: match[1], reading: match[2] } : { kanji: basicStr, reading: '' };
+    }
+
+    function splitTeTaData(teTaStr) {
+        if (!teTaStr) return { te: '-', ta: '-' };
+        const parts = teTaStr.split(' / ');
+        return parts.length === 2 ? { te: parts[0], ta: parts[1] } : { te: teTaStr, ta: '-' };
+    }
+
+    function convertToShortForm(longForm, typeLabel) {
+        if (typeLabel !== '一类') return { text: longForm, isShort: false };
+        if (longForm.includes('させられる')) return { text: longForm, isShort: false };
+        if (longForm.includes('せられる')) {
+            return { text: longForm.replace('せられる', 'される'), isShort: true };
+        }
+        return { text: longForm, isShort: false };
+    }
+
+    function getRawDataByType(type) {
+        if (typeof group1Verbs === 'undefined') { alert('错误：无法加载 verbs-data.js'); return []; }
+        const process = (arr, label, cssClass) => arr.map(item => ({ ...item, typeLabel: label, typeClass: cssClass }));
+
+        const g1 = process(group1Verbs, '一类', 'tag-g1');
+        const g2 = process(group2Verbs, '二类', 'tag-g2');
+        const g3 = process(group3Verbs, '三类', 'tag-g3');
+        const specials = (typeof specialVerbs !== 'undefined') ? process(specialVerbs, '特例', 'tag-special') : [];
+
+        if (type === 'group1') return g1;
+        if (type === 'group2') return g2;
+        if (type === 'group3') return g3;
+        if (type === 'special') return specials;
+        return [...g1, ...g2, ...g3, ...specials];
+    }
+
+    function shuffleArray(array) {
+        const newArr = [...array];
+        for (let i = newArr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+        }
+        return newArr;
+    }
+
+    // ==========================================
+    // 4. 交互逻辑
+    // ==========================================
+
+    function openSettingsModal() {
+        document.getElementById('settings-modal').classList.add('active');
+    }
+
+    // 更新设置
+    function updateSettings() {
+        const showNo = settingInputShowNo.checked;
+        const showType = settingInputShowType.checked;
+        const showReading = settingInputShowReading.checked;
+        const pageSizeStr = settingInputPageSize.value;
+        const pageSize = parseInt(pageSizeStr) || 30;
+
+        state.showNo = showNo;
+        state.showType = showType;
+        state.showReading = showReading;
+        state.pageSize = pageSize;
+        state.currentPage = 1;
+
+        // 写入 Cookie
+        setCookie('jp_verb_show_no', showNo, 365);
+        setCookie('jp_verb_show_type', showType, 365);
+        setCookie('jp_verb_show_reading', showReading, 365);
+        setCookie('jp_verb_page_size', pageSize, 365);
+
+        renderHeader();
+        renderTable();
+    }
+
+    // 同步 UI 状态
+    function syncSettingsUI() {
+        settingInputShowNo.checked = state.showNo;
+        settingInputShowType.checked = state.showType;
+        settingInputShowReading.checked = state.showReading;
+        settingInputPageSize.value = state.pageSize;
+    }
+
+    function openDictModal(word, event) {
+        if(event) event.stopPropagation();
+        document.getElementById('modal-word-display').textContent = word;
+        document.getElementById('link-mazii').href = `https://mazii.net/zh-CN/search/word/ja/zh-CN/${word}`;
+        document.getElementById('link-jisho').href = `https://jisho.org/search/${word}`;
+        document.getElementById('link-weblio').href = `https://www.weblio.jp/content/${word}`;
+        document.getElementById('link-google').href = `https://translate.google.com/?sl=ja&tl=zh-CN&text=${word}&op=translate`;
+        dictModal.classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
     }
 
     function toggleCPMode() {
-        useShortForm = !useShortForm;
-        if (useShortForm) {
-            btnToggleCP.textContent = "切换：口语缩略形";
-            btnToggleCP.classList.replace('btn-success', 'btn-warning');
+        state.useShortForm = !state.useShortForm;
+        if (state.useShortForm) {
+            btnToggleCP.textContent = "标准形"; // 缩短
         } else {
-            btnToggleCP.textContent = "切换：标准完整形";
-            btnToggleCP.classList.replace('btn-warning', 'btn-success');
+            btnToggleCP.textContent = "口语缩略"; // 缩短
         }
         renderHeader();
-        const data = getRawDataByType(currentTab);
-        renderTable(data);
+        renderTable();
     }
 
     function handleTabSwitch(e) {
         if (!e.target.classList.contains('tab-item')) return;
         document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
         e.target.classList.add('active');
-        currentTab = e.target.getAttribute('data-type');
-        const data = getRawDataByType(currentTab);
-        renderTable(data);
+        state.currentTab = e.target.getAttribute('data-type');
+
+        state.currentPage = 1;
+        state.fullDataList = getRawDataByType(state.currentTab);
+        renderHeader();
+        renderTable();
     }
 
     function handleShuffle() {
-        const originalData = getRawDataByType(currentTab);
-        const shuffledData = shuffleArray(originalData);
-        renderTable(shuffledData);
+        state.fullDataList = shuffleArray(state.fullDataList);
+        state.currentPage = 1;
+        renderTable();
     }
 
     function toggleAllMasks(show) {
@@ -524,6 +838,7 @@
         });
     }
 
+    // 事件监听
     tableBody.addEventListener('click', function(e) {
         if (e.target.dataset.mask === "true" || e.target.classList.contains('mask-cell')) {
             e.target.classList.toggle('revealed');
@@ -531,14 +846,19 @@
     });
 
     document.getElementById('tab-container').addEventListener('click', handleTabSwitch);
-    document.getElementById('btn-show-all').addEventListener('click', () => toggleAllMasks(true));
-    document.getElementById('btn-reset').addEventListener('click', () => toggleAllMasks(false));
-    document.getElementById('btn-shuffle').addEventListener('click', handleShuffle);
 
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.classList.remove('active');
+        });
+    });
+
+    // 初始化
     (function init() {
+        state.fullDataList = getRawDataByType('all');
+        syncSettingsUI();
         renderHeader();
-        const initData = getRawDataByType('all');
-        renderTable(initData);
+        renderTable();
     })();
 
 </script>
